@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Environment variables & secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# Test & coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Machine Learning files
+mlruns/
+mlartifacts/
+
+# Data files (optional - uncomment if datasets are large)
+# data/
+# datasets/
+# *.csv
+# *.xlsx
+# *.parquet
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cache
+.cache/
+``
