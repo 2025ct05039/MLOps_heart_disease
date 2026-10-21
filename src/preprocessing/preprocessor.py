@@ -8,39 +8,46 @@ import json
 
 class HeartDiseasePreprocessor:
     def __init__(self):
-        self.config_path = config_path
-        self.config = self.load_config()
         self.scaler = StandardScaler()
-        self.encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+        self.feature_names = None
+        self.is_fitted = False
 
-    def load_config(self):
-        with open(self.config_path, 'r') as f:
-            return json.load(f)
+    def fit(self, X):
+        """ Fit the processor to the data. """
+        X_cleaned = X.fillna(X.mean())
+        self.scaler.fit(X_cleaned)
+        self.feature_names = X_cleaned.columns.tolist()
+        self.is_fitted = True
+        return self
 
-    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Separate features and target
-        X = df.drop(columns=self.config['target_column'])
-        y = df[self.config['target_column']]
+    def transform(self, X):
+        # Transform the data using the fitted processor.
+        if not self.is_fitted:
+            raise ValueError("Preprocessor must be fitted first")
+        X_cleaned = X.fillna(X.mean())
+        X_scaled = self.scaler.transform(X_cleaned)
 
-        # Scale numerical features
-        X_scaled = self.scaler.fit_transform(X[self.config['numerical_features']])
-        X_scaled_df = pd.DataFrame(X_scaled, columns=self.config['numerical_features'])
+        return pd.DataFrame(X_scaled, columns=self.feature_names)
 
-        # Encode categorical features
-        X_encoded = self.encoder.fit_transform(X[self.config['categorical_features']])
-        X_encoded_df = pd.DataFrame(X_encoded, columns=self.encoder.get_feature_names_out(self.config['categorical_features']))
+    def fit_transform(self, X):
+        """ Fit and transform the data using the processor. """
 
-        # Combine scaled and encoded features
-        X_preprocessed = pd.concat([X_scaled_df, X_encoded_df], axis=1)
+        return self.fit(X).transform(X)
 
-        return X_preprocessed, y
-
-    def save_preprocessor(self, path: str):
+    def save(self, path):
+        """ Save processor to a file. """
         with open(path, 'wb') as f:
-            pickle.dump({'scaler': self.scaler, 'encoder': self.encoder}, f)
+            pickle.dump({'scaler': self.scaler,'feature_names': self.feature_names, 'is_fitted': self.is_fitted}, f)
 
-    def load_preprocessor(self, path: str):
+    def load(self, path):
+        """ Load processor from a file. """
+
         with open(path, 'rb') as f:
-            preprocessor = pickle.load(f)
-            self.scaler = preprocessor['scaler']
-            self.encoder = preprocessor['encoder']
+            data  = pickle.load(f)
+            self.scaler = data['scaler']
+            self.feature_names = data['feature_names']
+            self.is_fitted = data['is_fitted']
+
+        return self
+
+        
