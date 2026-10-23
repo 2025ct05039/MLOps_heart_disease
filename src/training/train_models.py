@@ -11,6 +11,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score,confusion_matrix, classification_report, roc_auc_score
 import matplotlib.pyplot as plt
 import seaborn as sns
+import sys
+
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.preprocessing.preprocessor import HeartDiseasePreprocessor
 
@@ -160,10 +164,10 @@ class ModelTrainer:
     def main(self):
         """Main function to run the training and evaluation pipeline."""
         #Set up MLflow experiment
-        mflow.set_experiment("Heart Disease Prediction")
+        mlflow.set_experiment("Heart Disease Prediction")
 
         # Prepare the data
-        trainer = ModelTrainer("src/data/heart_disease_data.csv")
+        trainer = ModelTrainer("data/raw/heart.csv")
         X_train, X_test, y_train, y_test = trainer.prepare_data()
 
         print(f"\n Data prepared : ") 
@@ -199,6 +203,6 @@ if __name__ == "__main__":
     test_size = 0.2
 
     #Run the training and evaluation pipeline
-    trainer = ModelTrainer("src/data/heart_disease_data.csv")
+    trainer = ModelTrainer("data/raw/heart.csv")
     trainer.main()
     
