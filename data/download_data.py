@@ -13,3 +13,4 @@ print(f"First few rows: {df.head()}")
 print(f"Last few rows: {df.tail()}")
 print(f"data types: {df.dtypes}")
 print(f"Missing values: {df.isnull().sum()}")
+
