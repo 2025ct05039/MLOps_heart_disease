@@ -40,4 +40,18 @@ def test_predict_endpoint(client):
     assert 'prediction' in response.json
     assert 'confidence' in response.json
 
-    
+def test_predict_rejects_malformed_json(client):
+    response = client.post(
+        '/predict',
+        data='{"age":50,"sex":1",',
+        content_type='application/json',
+    )
+
+    assert response.status_code == 400
+    assert response.json['error'] == 'Invalid JSON'
+
+def test_predict_requires_json_content_type(client):
+    response = client.post('/predict', data='{}', content_type='text/plain')
+
+    assert response.status_code == 415
+    assert response.json['error'] == 'Unsupported media type'

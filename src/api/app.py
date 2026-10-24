@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from pydantic import BaseModel, ValidationError
+from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 import pandas as pd
 import pickle
 from pathlib import Path
@@ -23,6 +24,10 @@ def load_model_and_preprocessor():
     try:
         with open(MODEL_PATH, 'rb') as f:
             model = pickle.load(f)
+        import sys
+
+        project_root = Path(__file__).parent.parent.parent
+        sys.path.insert(0, str(project_root))
         from src.preprocessing.preprocessor import HeartDiseasePreprocessor
         preprocessor = HeartDiseasePreprocessor()
         preprocessor.load(str(PREPROCESSOR_PATH))
@@ -94,6 +99,18 @@ def predict():
 
         return jsonify(response), 200
 
+    except BadRequest as e:
+        logger.warning(f"Invalid JSON request: {e}")
+        return jsonify({
+            'error': 'Invalid JSON',
+            'details': 'Request body must contain valid JSON.'
+        }), 400
+    except UnsupportedMediaType as e:
+        logger.warning(f"Unsupported request content type: {e}")
+        return jsonify({
+            'error': 'Unsupported media type',
+            'details': 'Set Content-Type to application/json.'
+        }), 415
     except ValidationError as e:
         logger.error(f"Validation error: {e}")
         return jsonify({'error': 'Invalid request', 'details': e.errors()}), 400
