@@ -18,6 +18,9 @@ sys.path.insert(0, str(project_root))
 
 from src.preprocessing.preprocessor import HeartDiseasePreprocessor
 
+RANDOM_STATE = 42
+TEST_SIZE = 0.2
+
 class ModelTrainer:
     """ train and evaluate models for heart disease prediction. """
     def __init__(self, data_path):
@@ -35,7 +38,9 @@ class ModelTrainer:
         y = (self.df['target'] > 0).astype(int)  # Convert target to binary (0 or 1)
         
         #Train test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y
+        )
 
         #Preprocess the data
         self.preprocessor.fit(X_train)
@@ -102,7 +107,11 @@ class ModelTrainer:
             mlflow.log_metrics(metrics)
 
             # Log model
-            mlflow.sklearn.log_model(model, "random_forest_model")
+            mlflow.sklearn.log_model(
+                model,
+                "random_forest_model",
+                skops_trusted_types=["sklearn.tree._tree.Tree"],
+            )
             self.models['random_forest'] = model
             self.results['random_forest'] = metrics
 
@@ -114,6 +123,7 @@ class ModelTrainer:
         """Evaluate the model and return metrics."""
         y_train_pred = model.predict(X_train)
         y_test_pred = model.predict(X_test)
+        y_train_proba = model.predict_proba(X_train)[:, 1]
         y_test_proba = model.predict_proba(X_test)[:, 1]  # Probability estimates for the positive class
 
         metrics = {
@@ -198,9 +208,7 @@ class ModelTrainer:
 
 if __name__ == "__main__":
     #Set random seed for reproducibility
-    random_state = 42
-    np.random.seed(random_state)
-    test_size = 0.2
+    np.random.seed(RANDOM_STATE)
 
     #Run the training and evaluation pipeline
     trainer = ModelTrainer("data/raw/heart.csv")
