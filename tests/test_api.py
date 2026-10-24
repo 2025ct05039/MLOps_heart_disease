@@ -1,13 +1,8 @@
 import pytest
-import json
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 @pytest.fixture
 def client():
-    from src.api import app
+    from src.api.app import app
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
@@ -16,7 +11,9 @@ def client():
 def test_health_endpoint(client):
     response = client.get('/health')
     assert response.status_code == 200
-    assert response.json == {"status": "healthy"}
+    assert response.json["status"] == "healthy"
+    assert "model_loaded" in response.json
+    assert "timestamp" in response.json
 
 
 def test_predict_endpoint(client):

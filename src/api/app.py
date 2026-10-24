@@ -80,7 +80,7 @@ def predict():
 
         #Predict
         prediction = model.predict(input_processed)[0]
-        confidence = float(model.predict.proba(input_processed)[0][int(prediction)])
+        confidence = float(model.predict_proba(input_processed)[0][int(prediction)])
 
         #Log
         logger.info(f"Prediction made: {prediction}, confidence: {confidence:.4f}")
@@ -101,7 +101,7 @@ def predict():
         logger.error(f"Prediction failed: {e}")
         return jsonify({'error': 'Prediction failed'}), 500
 
-@app.route('\info', methods=['GET'])
+@app.route('/info', methods=['GET'])
 
 def info():
     """API Information endpoint"""
@@ -112,10 +112,9 @@ def info():
         'endpoints': {
             '/health': 'GET- Health check',
             '/predict': 'POST- Make prediction',
-            'info': 'GET - API informaition'
+            '/info': 'GET - API information'
         }
     }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5000,debug=False)
-

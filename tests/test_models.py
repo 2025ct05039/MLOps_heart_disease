@@ -1,7 +1,8 @@
 import pytest
 import pandas as pd
 import numpy as np
-from  src.training.train_models import ModelTrainer
+
+from src.training.train_models import ModelTrainer
 
 @pytest.fixture
 def trainer():
@@ -33,4 +34,3 @@ def test_random_forest_training(trainer):
     # Check that results for random forest are stored
     assert "test_roc_auc" in metrics
     assert metrics["test_roc_auc"] > 0.5
-
