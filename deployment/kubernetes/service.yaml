@@ -1,0 +1,15 @@
+apiversion: v1
+kind: Service
+metadata:
+  name: heart-disease-api-service
+  labels:
+    app: heart-disease-api 
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  selector:
+    app:  heart-disease-api
+    
