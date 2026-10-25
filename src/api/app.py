@@ -4,6 +4,8 @@ from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 import pandas as pd
 import pickle
 from pathlib import Path
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from src.api.metrics import request_count, model_predictions, get_confidence_range
 
 import logging
 from datetime import datetime
@@ -57,6 +59,13 @@ class PredictionRequest(BaseModel):
     ca: float
     thal: float
 
+@app.route('/metrics', methods=['GET'])
+
+def metrics():
+
+    """Prometheus metric endpoint"""
+    return generate_latest(), 200, {'Content type': CONTENT_TYPE_LATEST}
+
 @app.route('/health',methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -96,6 +105,18 @@ def predict():
             'prediction:label': 'Heart Disease Present' if prediction ==1 else 'No Heart Disease',
             'timestamp' : datetime.utcnow().isoformat()
         }
+
+        #Track metrics
+        request_count.labels(
+            method = 'POST',
+            endpoint = '/predict',
+            status = 200
+        ).inc()
+
+        model_predictions.labels(
+            prediction = prediction,
+            confidence_range = get_confidence_range(confidence)
+        ).inc()
 
         return jsonify(response), 200
 
